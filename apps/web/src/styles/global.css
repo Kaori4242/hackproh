@@ -785,6 +785,11 @@ img {
   margin: 0;
 }
 
+.chat-empty-cta {
+  justify-self: center;
+  margin-top: 0.6rem;
+}
+
 .message-row {
   display: flex;
   margin: 0 auto;

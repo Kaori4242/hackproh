@@ -718,7 +718,15 @@ export default function App() {
 
           {dashboardTab === "chat" ? (
             <section className="chat-layout">
-              <ChatPanel business={selectedBusiness} user={user} />
+              <ChatPanel
+                business={selectedBusiness}
+                user={user}
+                onCreateProjectClick={() => {
+                  setDashboardTab("projects");
+                  setSelectedId(null);
+                  setIsProjectModalOpen(true);
+                }}
+              />
             </section>
           ) : null}
 

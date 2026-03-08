@@ -8,9 +8,10 @@ import type { BusinessRecord, ChatMessage } from "../lib/types";
 type ChatPanelProps = {
   business?: BusinessRecord;
   user?: User | null;
+  onCreateProjectClick?: () => void;
 };
 
-export function ChatPanel({ business, user }: ChatPanelProps) {
+export function ChatPanel({ business, user, onCreateProjectClick }: ChatPanelProps) {
   const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -110,6 +111,9 @@ export function ChatPanel({ business, user }: ChatPanelProps) {
           <section className="chat-empty-state">
             <h3>Create a project first</h3>
             <p>Open the Projects tab, complete the 3-step setup, then start chatting with your indexed business context.</p>
+            <button className="primary-button chat-empty-cta" onClick={onCreateProjectClick} type="button">
+              Create project
+            </button>
           </section>
         ) : null}
 
