@@ -59,6 +59,7 @@ function toBusinessRecord(id: string, value: Record<string, unknown>): BusinessR
 }
 
 type RoutePath = "/" | "/auth" | "/dashboard";
+type DashboardTab = "chat" | "projects" | "messenger" | "settings";
 
 function normalizeRoute(pathname: string): RoutePath {
   if (pathname === "/auth") {
@@ -85,6 +86,7 @@ export default function App() {
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+  const [dashboardTab, setDashboardTab] = useState<DashboardTab>("chat");
 
   useEffect(() => {
     const syncRoute = () => setRoute(normalizeRoute(window.location.pathname));
@@ -469,109 +471,214 @@ export default function App() {
 
   return (
     <main className="dashboard-shell">
-      <header className="dashboard-topbar">
-        <div>
-          <p className="eyebrow">Dashboard</p>
-          <h1>Project workspace</h1>
-        </div>
-        <div className="nav-actions">
-          <button
-            className="ghost-button"
-            onClick={() => {
-              setSelectedId(null);
-              setIsProjectModalOpen(true);
-            }}
-            type="button"
-          >
-            New project
-          </button>
-          <button className="ghost-button" onClick={handleSignOut} type="button">
-            Sign out
-          </button>
-        </div>
-      </header>
-
-      <section className="dashboard-grid">
-        <aside className="project-rail panel">
-          <div className="section-heading">
+      <div className="dashboard-layout">
+        <aside className="dashboard-sidebar">
+          <div className="sidebar-brand">
+            <span className="brand-mark">SME</span>
             <div>
-              <p className="eyebrow">Projects</p>
-              <h2>Your workspace</h2>
+              <p className="eyebrow">Workspace</p>
+              <strong>Copilot Malaysia</strong>
             </div>
           </div>
 
-          <div className="project-list">
-            {businesses.map((business) => (
-              <button
-                className={`project-item ${selectedId === business.id ? "active" : ""}`}
-                key={business.id}
-                onClick={() => {
-                  setSelectedId(business.id);
-                }}
-                type="button"
-              >
-                <div className="project-thumb">
-                  {business.logoUrl ? <img alt={business.name} src={business.logoUrl} /> : <span>{business.name[0]}</span>}
-                </div>
-                <div>
-                  <strong>{business.name}</strong>
-                  <span>{business.city || "No city yet"}</span>
-                </div>
-              </button>
-            ))}
-            {!businesses.length ? (
-              <p className="muted">No projects yet. Create the first one with the 3-step flow.</p>
-            ) : null}
-          </div>
+          <nav className="sidebar-tabs">
+            <button
+              className={`sidebar-tab ${dashboardTab === "chat" ? "active" : ""}`}
+              onClick={() => setDashboardTab("chat")}
+              type="button"
+            >
+              Chat
+            </button>
+            <button
+              className={`sidebar-tab ${dashboardTab === "projects" ? "active" : ""}`}
+              onClick={() => setDashboardTab("projects")}
+              type="button"
+            >
+              Projects
+            </button>
+            <button
+              className={`sidebar-tab ${dashboardTab === "messenger" ? "active" : ""}`}
+              onClick={() => setDashboardTab("messenger")}
+              type="button"
+            >
+              Messenger integration
+            </button>
+            <button
+              className={`sidebar-tab ${dashboardTab === "settings" ? "active" : ""}`}
+              onClick={() => setDashboardTab("settings")}
+              type="button"
+            >
+              Settings
+            </button>
+          </nav>
 
-          <div className="context-block">
-            <p className="eyebrow">Live project context</p>
-            <p>{cityProfile?.rainSummary ?? "Select a project to view its city and weather context."}</p>
+          <div className="sidebar-foot">
+            <p className="eyebrow">Workspace</p>
+            <p>{businesses.length ? `${businesses.length} active project(s)` : "No projects yet"}</p>
           </div>
         </aside>
 
-        <section className="workspace-stage">
-          {saveError ? <p className="error-text panel">{saveError}</p> : null}
-          <section className="panel workspace-empty-state">
-            <p className="eyebrow">Project creation</p>
-            <h2>{selectedBusiness ? selectedBusiness.name : "Create your first project"}</h2>
-            <p className="hero-copy">
-              Start project setup in a popup flow for identity, materials, and location. Existing projects stay visible
-              in the left rail and can be updated from the same flow.
-            </p>
+        <section className="dashboard-main">
+          <header className="dashboard-topbar">
+            <div>
+              <p className="eyebrow">Dashboard</p>
+              <h1>
+                {dashboardTab === "chat"
+                  ? "AI workspace"
+                  : dashboardTab === "projects"
+                    ? "Projects"
+                  : dashboardTab === "messenger"
+                    ? "Messenger integration"
+                    : "Settings"}
+              </h1>
+            </div>
             <div className="nav-actions">
-              <button
-                className="primary-button"
-                onClick={() => {
-                  if (!selectedBusiness) {
+              {dashboardTab === "projects" ? (
+                <button
+                  className="ghost-button"
+                  onClick={() => {
                     setSelectedId(null);
-                  }
-                  setIsProjectModalOpen(true);
-                }}
-                type="button"
-              >
-                {selectedBusiness ? "Edit project" : "Create project"}
+                    setIsProjectModalOpen(true);
+                  }}
+                  type="button"
+                >
+                  New project
+                </button>
+              ) : null}
+              <button className="ghost-button" onClick={handleSignOut} type="button">
+                Sign out
               </button>
             </div>
-          </section>
-          <div className="dashboard-metrics">
-            <article className="stat-card">
-              <span>{businesses.length}</span>
-              <small>Projects</small>
-            </article>
-            <article className="stat-card">
-              <span>{selectedBusiness?.materials.length ?? 0}</span>
-              <small>Uploaded materials</small>
-            </article>
-            <article className="stat-card">
-              <span>{isIndexing ? "Syncing" : cityProfile?.city ?? "Pending"}</span>
-              <small>Assistant context</small>
-            </article>
-          </div>
-        </section>
+          </header>
 
-        <ChatPanel business={selectedBusiness} user={user} />
-      </section>
+          {saveError ? <p className="error-text panel">{saveError}</p> : null}
+
+          {dashboardTab === "chat" ? (
+            <section className="chat-layout">
+              <ChatPanel business={selectedBusiness} user={user} />
+            </section>
+          ) : null}
+
+          {dashboardTab === "projects" ? (
+            <section className="dashboard-tab-content">
+              <section className="panel projects-panel">
+                <div className="section-heading">
+                  <div>
+                    <p className="eyebrow">Project management</p>
+                    <h2>Choose and manage project context</h2>
+                  </div>
+                  <div className="nav-actions">
+                    {selectedBusiness ? (
+                      <button className="ghost-button" onClick={() => setIsProjectModalOpen(true)} type="button">
+                        Edit selected
+                      </button>
+                    ) : null}
+                    <button
+                      className="primary-button"
+                      onClick={() => {
+                        setSelectedId(null);
+                        setIsProjectModalOpen(true);
+                      }}
+                      type="button"
+                    >
+                      New project
+                    </button>
+                  </div>
+                </div>
+
+                <div className="project-chip-row">
+                  {businesses.map((business) => (
+                    <button
+                      className={`project-chip ${selectedId === business.id ? "active" : ""}`}
+                      key={business.id}
+                      onClick={() => setSelectedId(business.id)}
+                      type="button"
+                    >
+                      {business.logoUrl ? <img alt={business.name} src={business.logoUrl} /> : <span>{business.name[0]}</span>}
+                      <strong>{business.name}</strong>
+                    </button>
+                  ))}
+                </div>
+
+                {!businesses.length ? (
+                  <p className="muted">
+                    No projects yet. Create one and complete the 3-step flow so chat can use your business context.
+                  </p>
+                ) : null}
+
+                {selectedBusiness ? (
+                  <section className="project-meta">
+                    <h2>{selectedBusiness.name}</h2>
+                    <span>{selectedBusiness.city || "No city set"}</span>
+                    <span>{isIndexing ? "Syncing knowledge..." : `${selectedBusiness.materials.length} uploaded materials`}</span>
+                    <span>{cityProfile?.rainSummary ?? "City context will appear after location is set."}</span>
+                    <button className="ghost-button" onClick={() => setDashboardTab("chat")} type="button">
+                      Open in chat
+                    </button>
+                  </section>
+                ) : null}
+              </section>
+            </section>
+          ) : null}
+
+          {dashboardTab === "messenger" ? (
+            <section className="dashboard-tab-content">
+              <section className="panel integration-panel">
+                <p className="eyebrow">Meta channels</p>
+                <h2>Connect Facebook and Instagram messaging</h2>
+                <p className="muted">
+                  Keep customer chats synced to this workspace, then use AI to answer with your uploaded business context.
+                </p>
+                <label>
+                  <span>Facebook Page ID</span>
+                  <input placeholder="123456789012345" />
+                </label>
+                <label>
+                  <span>Webhook verify token</span>
+                  <input placeholder="your-secure-verify-token" />
+                </label>
+                <label>
+                  <span>Messenger access token</span>
+                  <input placeholder="EAAG..." />
+                </label>
+                <button className="primary-button" type="button">
+                  Save integration
+                </button>
+              </section>
+            </section>
+          ) : null}
+
+          {dashboardTab === "settings" ? (
+            <section className="dashboard-tab-content">
+              <section className="panel settings-panel">
+                <p className="eyebrow">Workspace settings</p>
+                <h2>Assistant behavior and defaults</h2>
+                <label>
+                  <span>Default response language</span>
+                  <select defaultValue="en">
+                    <option value="en">English</option>
+                    <option value="ms">Bahasa Melayu</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Ops escalation email</span>
+                  <input placeholder="ops@company.com" />
+                </label>
+                <label>
+                  <span>Default city note</span>
+                  <textarea
+                    defaultValue="Prioritize weather and flood impacts in operational suggestions."
+                    rows={4}
+                  />
+                </label>
+                <button className="primary-button" type="button">
+                  Save settings
+                </button>
+              </section>
+            </section>
+          ) : null}
+        </section>
+      </div>
 
       {isProjectModalOpen ? (
         <div className="modal-backdrop" role="presentation" onClick={() => setIsProjectModalOpen(false)}>

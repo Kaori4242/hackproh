@@ -8,6 +8,10 @@ const ai = new GoogleGenAI({ apiKey: config.geminiApiKey });
 const EMBEDDING_MODEL = "gemini-embedding-001";
 const EMBEDDING_DIMENSION = 768;
 
+export function shouldIncludeWeatherContext(message: string) {
+  return /(weather|rain|flood|storm|climate|monsoon|temperature|humid|precipitation)/i.test(message);
+}
+
 function stringValue(value: unknown): string {
   return typeof value === "string" ? value : "";
 }
@@ -338,6 +342,7 @@ export async function generateBusinessAnswer(input: {
   knowledgeSnippets: string[];
 }) {
   const { business, history, knowledgeSnippets, message, weatherAlerts, weatherSummary } = input;
+  const includeWeatherContext = shouldIncludeWeatherContext(message);
 
   const response = await ai.models.generateContent({
     model: "gemini-2.5-pro",
@@ -356,10 +361,14 @@ export async function generateBusinessAnswer(input: {
               business.website ? `Website: ${business.website}` : "",
               business.socialLinks.length ? `Social links: ${business.socialLinks.join(", ")}` : "",
               "",
-              `Weather and city context`,
-              weatherSummary,
-              weatherAlerts.length ? `Weather alerts: ${weatherAlerts.join(" | ")}` : "Weather alerts: none returned",
-              "",
+              includeWeatherContext
+                ? [
+                    `Weather and city context`,
+                    weatherSummary || "No live weather summary was returned.",
+                    weatherAlerts.length ? `Weather alerts: ${weatherAlerts.join(" | ")}` : "Weather alerts: none returned",
+                    ""
+                  ].join("\n")
+                : "",
               `Retrieved knowledge`,
               knowledgeSnippets.length ? knowledgeSnippets.join("\n\n") : "No indexed knowledge available yet.",
               "",
@@ -375,10 +384,8 @@ export async function generateBusinessAnswer(input: {
     config: {
       systemInstruction: [
         "You are an operations assistant for a Malaysian SME.",
-        "For every request, first incorporate the live weather and city flood/rain context provided to you.",
-        "Then use the retrieved uploaded files, links, and business knowledge before making assumptions.",
-        "Blend business facts with city-level rain, flood, and live weather conditions.",
-        "When weather or flood conditions could affect staffing, sales, logistics, or inventory, say so explicitly.",
+        "Use retrieved uploaded files, links, and business knowledge before making assumptions.",
+        "Use weather and flood context only when the user asks about weather, rain, flood, climate, or weather-driven operational impact.",
         "If the user's question needs details from uploaded materials, rely on the retrieved knowledge snippets and say when the source appears incomplete.",
         "If the indexed material is thin or unavailable, say that directly and answer from the available business and city context."
       ].join(" ")

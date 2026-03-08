@@ -2,7 +2,13 @@ import cors from "cors";
 import express, { type Request, type Response, type NextFunction } from "express";
 import { adminAuth } from "./firebase.js";
 import { config } from "./config.js";
-import { generateBusinessAnswer, getBusiness, reindexBusinessKnowledge, retrieveRelevantContext } from "./knowledge.js";
+import {
+  generateBusinessAnswer,
+  getBusiness,
+  reindexBusinessKnowledge,
+  retrieveRelevantContext,
+  shouldIncludeWeatherContext
+} from "./knowledge.js";
 import { getWeatherSnapshot } from "./weather.js";
 import type { ChatMessage } from "./types.js";
 
@@ -78,9 +84,10 @@ app.post("/api/businesses/:businessId/chat", requireAuth, async (request: Authed
       return;
     }
 
+    const includeWeatherContext = shouldIncludeWeatherContext(body.message);
     const [retrieval, weather] = await Promise.all([
       retrieveRelevantContext(businessId, body.message),
-      getWeatherSnapshot(business.city)
+      includeWeatherContext ? getWeatherSnapshot(business.city) : Promise.resolve({ summary: "", alerts: [] })
     ]);
 
     const answer = await generateBusinessAnswer({
