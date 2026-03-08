@@ -84,6 +84,7 @@ export default function App() {
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
 
   useEffect(() => {
     const syncRoute = () => setRoute(normalizeRoute(window.location.pathname));
@@ -140,6 +141,7 @@ export default function App() {
   );
 
   const cityProfile = selectedBusiness ? MALAYSIA_CITY_MAP.get(selectedBusiness.city) : undefined;
+  const activeWizardBusiness = isProjectModalOpen ? selectedBusiness : undefined;
 
   function navigate(next: RoutePath) {
     window.history.pushState({}, "", next);
@@ -298,6 +300,8 @@ export default function App() {
         setSelectedId(reference.id);
         await handleIndexing(reference.id);
       }
+
+      setIsProjectModalOpen(false);
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : "Could not save the business.");
     } finally {
@@ -471,7 +475,14 @@ export default function App() {
           <h1>Project workspace</h1>
         </div>
         <div className="nav-actions">
-          <button className="ghost-button" onClick={() => setSelectedId(null)} type="button">
+          <button
+            className="ghost-button"
+            onClick={() => {
+              setSelectedId(null);
+              setIsProjectModalOpen(true);
+            }}
+            type="button"
+          >
             New project
           </button>
           <button className="ghost-button" onClick={handleSignOut} type="button">
@@ -494,7 +505,9 @@ export default function App() {
               <button
                 className={`project-item ${selectedId === business.id ? "active" : ""}`}
                 key={business.id}
-                onClick={() => setSelectedId(business.id)}
+                onClick={() => {
+                  setSelectedId(business.id);
+                }}
                 type="button"
               >
                 <div className="project-thumb">
@@ -519,7 +532,28 @@ export default function App() {
 
         <section className="workspace-stage">
           {saveError ? <p className="error-text panel">{saveError}</p> : null}
-          <ProjectWizard business={selectedBusiness} isSaving={isSaving} onSave={handleSaveBusiness} />
+          <section className="panel workspace-empty-state">
+            <p className="eyebrow">Project creation</p>
+            <h2>{selectedBusiness ? selectedBusiness.name : "Create your first project"}</h2>
+            <p className="hero-copy">
+              Start project setup in a popup flow for identity, materials, and location. Existing projects stay visible
+              in the left rail and can be updated from the same flow.
+            </p>
+            <div className="nav-actions">
+              <button
+                className="primary-button"
+                onClick={() => {
+                  if (!selectedBusiness) {
+                    setSelectedId(null);
+                  }
+                  setIsProjectModalOpen(true);
+                }}
+                type="button"
+              >
+                {selectedBusiness ? "Edit project" : "Create project"}
+              </button>
+            </div>
+          </section>
           <div className="dashboard-metrics">
             <article className="stat-card">
               <span>{businesses.length}</span>
@@ -538,6 +572,19 @@ export default function App() {
 
         <ChatPanel business={selectedBusiness} user={user} />
       </section>
+
+      {isProjectModalOpen ? (
+        <div className="modal-backdrop" role="presentation" onClick={() => setIsProjectModalOpen(false)}>
+          <div className="modal-shell" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true">
+            <ProjectWizard
+              business={activeWizardBusiness}
+              isSaving={isSaving}
+              onCancel={() => setIsProjectModalOpen(false)}
+              onSave={handleSaveBusiness}
+            />
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }

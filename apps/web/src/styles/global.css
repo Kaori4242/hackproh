@@ -189,6 +189,11 @@ img {
   gap: 1rem;
 }
 
+.workspace-empty-state {
+  min-height: 240px;
+  align-content: center;
+}
+
 .wizard-grid {
   grid-template-columns: 240px minmax(0, 1fr);
   align-items: start;
@@ -199,7 +204,6 @@ img {
 }
 
 .project-rail,
-.wizard-panel,
 .chat-panel {
   min-height: 100%;
 }
@@ -497,6 +501,23 @@ img {
 
 .wizard-actions {
   margin-top: 1rem;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(20, 32, 25, 0.28);
+  backdrop-filter: blur(8px);
+  z-index: 20;
+}
+
+.modal-shell {
+  width: min(980px, 100%);
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
 }
 
 .dashboard-metrics {

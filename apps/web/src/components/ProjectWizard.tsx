@@ -5,6 +5,7 @@ import type { BusinessInput, BusinessRecord, MaterialRef } from "../lib/types";
 type ProjectWizardProps = {
   business?: BusinessRecord;
   isSaving: boolean;
+  onCancel: () => void;
   onSave: (
     value: BusinessInput,
     assets: {
@@ -47,7 +48,7 @@ function materialLabel(material: MaterialRef | File) {
   return `${material.name} · ${Math.round(material.size / 1024)} KB`;
 }
 
-export function ProjectWizard({ business, isSaving, onSave }: ProjectWizardProps) {
+export function ProjectWizard({ business, isSaving, onCancel, onSave }: ProjectWizardProps) {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<BusinessInput>(EMPTY_FORM);
   const [socialLinks, setSocialLinks] = useState("");
@@ -358,11 +359,11 @@ export function ProjectWizard({ business, isSaving, onSave }: ProjectWizardProps
       <div className="wizard-actions">
         <button
           className="ghost-button"
-          disabled={step === 0 || isSaving}
-          onClick={() => setStep((current) => current - 1)}
+          disabled={isSaving}
+          onClick={step === 0 ? onCancel : () => setStep((current) => current - 1)}
           type="button"
         >
-          Back
+          {step === 0 ? "Cancel" : "Back"}
         </button>
         <button className="primary-button" disabled={isSaving} type="submit">
           {isSaving ? "Saving..." : step === STEPS.length - 1 ? "Save project" : "Continue"}
