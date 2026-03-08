@@ -6,9 +6,10 @@
     "dev": "bash ./run-dev.sh",
     "dev:web": "npm run dev --prefix apps/web",
     "dev:chat": "npm run dev --prefix services/chat",
-    "build": "npm run build --prefix apps/web && npm run build --prefix services/chat",
+    "dev:telegram": "npm run dev --prefix services/telegram",
+    "build": "npm run build --prefix apps/web && npm run build --prefix services/chat && npm run build --prefix services/telegram",
     "build:web": "npm run build --prefix apps/web",
-    "build:chat": "npm run build --prefix services/chat"
+    "build:chat": "npm run build --prefix services/chat",
+    "build:telegram": "npm run build --prefix services/telegram"
   }
 }
-

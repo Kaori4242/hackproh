@@ -10,8 +10,11 @@
   },
   "dependencies": {
     "firebase": "latest",
+    "lucide-react": "^0.577.0",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@types/react": "latest",
@@ -21,4 +24,3 @@
     "vite": "latest"
   }
 }
-

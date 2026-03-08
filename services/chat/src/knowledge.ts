@@ -9,7 +9,9 @@ const EMBEDDING_MODEL = "gemini-embedding-001";
 const EMBEDDING_DIMENSION = 768;
 
 export function shouldIncludeWeatherContext(message: string) {
-  return /(weather|rain|flood|storm|climate|monsoon|temperature|humid|precipitation)/i.test(message);
+  return /\b(weather|rain|rainfall|flood|storm|monsoon|temperature|humid(?:ity)?|precipitation|forecast|thunderstorm|heatwave|windy|climate change)\b/i.test(
+    message
+  );
 }
 
 function stringValue(value: unknown): string {
@@ -340,12 +342,13 @@ export async function generateBusinessAnswer(input: {
   weatherSummary: string;
   weatherAlerts: string[];
   knowledgeSnippets: string[];
+  model?: string;
 }) {
-  const { business, history, knowledgeSnippets, message, weatherAlerts, weatherSummary } = input;
+  const { business, history, knowledgeSnippets, message, weatherAlerts, weatherSummary, model } = input;
   const includeWeatherContext = shouldIncludeWeatherContext(message);
 
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-pro",
+    model: model ?? "gemini-2.5-pro",
     contents: [
       ...historyToContents(history.slice(-8)),
       {
@@ -384,10 +387,12 @@ export async function generateBusinessAnswer(input: {
     config: {
       systemInstruction: [
         "You are an operations assistant for a Malaysian SME.",
-        "Use retrieved uploaded files, links, and business knowledge before making assumptions.",
-        "Use weather and flood context only when the user asks about weather, rain, flood, climate, or weather-driven operational impact.",
-        "If the user's question needs details from uploaded materials, rely on the retrieved knowledge snippets and say when the source appears incomplete.",
-        "If the indexed material is thin or unavailable, say that directly and answer from the available business and city context."
+        "Behave as a consultative analyst: reason through the user's goal, constraints, and tradeoffs before giving recommendations.",
+        "Prioritize retrieved uploaded files, links, and business knowledge as your primary evidence.",
+        "Use weather/flood data only as supporting context when explicitly relevant to the user's request.",
+        "Do not let weather context dominate non-weather questions.",
+        "If the user's question needs details from uploaded materials, rely on the retrieved knowledge snippets and state when the source appears incomplete.",
+        "If indexed material is thin or unavailable, say that directly and provide practical research-driven next steps based on the available business context."
       ].join(" ")
     }
   });

@@ -1,5 +1,7 @@
 import { startTransition, useEffect, useRef, useState } from "react";
 import type { User } from "firebase/auth";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { CHAT_API_URL } from "../lib/config";
 import type { BusinessRecord, ChatMessage } from "../lib/types";
 
@@ -103,13 +105,6 @@ export function ChatPanel({ business, user }: ChatPanelProps) {
 
   return (
     <section className="chat-panel">
-      <div className="chat-panel-head">
-        <div>
-          <p className="eyebrow">SME Copilot</p>
-          <h2>Gemini 2.5 Pro copilot</h2>
-        </div>
-      </div>
-
       <div className="chat-stream" ref={streamRef}>
         {!business ? (
           <section className="chat-empty-state">
@@ -121,10 +116,21 @@ export function ChatPanel({ business, user }: ChatPanelProps) {
         {messages.map((entry, index) => (
           <article className={`message-row message-row-${entry.role}`} key={`${entry.role}-${index}`}>
             <article className={`message message-${entry.role}`}>
-              <p>{entry.text}</p>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{entry.text}</ReactMarkdown>
             </article>
           </article>
         ))}
+        {isSending && (
+          <article className="message-row message-row-assistant">
+            <article className="message message-assistant">
+              <div className="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </article>
+          </article>
+        )}
       </div>
 
       {error ? <p className="error-text">{error}</p> : null}
@@ -133,7 +139,7 @@ export function ChatPanel({ business, user }: ChatPanelProps) {
         <div className="composer-shell">
           <textarea
             disabled={!business || isSending}
-            rows={2}
+            rows={1}
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
             onKeyDown={handleComposerKeyDown}
@@ -144,12 +150,14 @@ export function ChatPanel({ business, user }: ChatPanelProps) {
             }
           />
           <div className="composer-actions">
-            <small>{business ? "Uses project profile, indexed files, and links. Weather is used only when asked." : "No active project selected."}</small>
-            <button className="composer-send" disabled={!business || isSending || !draft.trim()} type="submit">
-              {isSending ? "Thinking..." : "Send"}
+            <button className="composer-send" disabled={!business || isSending || !draft.trim()} type="submit" aria-label="Send">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
             </button>
           </div>
         </div>
+        <p className="chat-disclaimer">
+          {business ? "Uses project profile, indexed files, and links. Weather is used only when asked." : "No active project selected."}
+        </p>
       </form>
     </section>
   );

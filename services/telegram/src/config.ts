@@ -3,16 +3,13 @@ function required(name: string): string {
   if (!value) {
     throw new Error(`Missing required environment variable: ${name}`);
   }
-
   return value;
 }
 
 export const config = {
   port: Number(process.env.PORT ?? 8080),
   webOrigin: process.env.WEB_ORIGIN ?? "http://localhost:5173",
-  geminiApiKey: required("GEMINI_API_KEY"),
-  googleWeatherApiKey: process.env.GOOGLE_WEATHER_API_KEY ?? "",
-  internalServiceToken: process.env.INTERNAL_SERVICE_TOKEN ?? "",
-  firebaseStorageBucket: process.env.FIREBASE_STORAGE_BUCKET ?? "",
+  chatServiceUrl: required("CHAT_SERVICE_URL").replace(/\/$/, ""),
+  internalServiceToken: required("INTERNAL_SERVICE_TOKEN"),
   projectId: process.env.GOOGLE_CLOUD_PROJECT ?? "hackproj-a8b50"
 };

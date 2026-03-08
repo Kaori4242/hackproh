@@ -9,6 +9,7 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 npm run dev --prefix /Users/kaori/Documents/hackproh/services/chat &
+npm run dev --prefix /Users/kaori/Documents/hackproh/services/telegram &
 npm run dev --prefix /Users/kaori/Documents/hackproh/apps/web &
 
 wait
