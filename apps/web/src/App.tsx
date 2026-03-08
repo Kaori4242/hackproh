@@ -18,6 +18,7 @@ import { CHAT_API_URL, TELEGRAM_API_URL } from "./lib/config";
 import {
   db,
   endSession,
+  resolveGoogleRedirectSignIn,
   signInWithEmail,
   signInWithGoogle,
   signUpWithEmail,
@@ -110,6 +111,12 @@ export default function App() {
       }
     });
   }, [route]);
+
+  useEffect(() => {
+    void resolveGoogleRedirectSignIn().catch((error) => {
+      setSaveError(formatAuthError(error));
+    });
+  }, []);
 
   useEffect(() => {
     if (!user) {

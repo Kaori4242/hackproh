@@ -8,7 +8,7 @@ CHAT_SERVICE_NAME="${CHAT_SERVICE_NAME:-sme-copilot-chat}"
 CHAT_SOURCE_DIR="${CHAT_SOURCE_DIR:-/Users/kaori/Documents/hackproh/services/chat}"
 TELEGRAM_SERVICE_NAME="${TELEGRAM_SERVICE_NAME:-sme-copilot-telegram}"
 TELEGRAM_SOURCE_DIR="${TELEGRAM_SOURCE_DIR:-/Users/kaori/Documents/hackproh/services/telegram}"
-WEB_ORIGIN="${WEB_ORIGIN:-http://localhost:5173,https://hackproj-a8b50.web.app,https://hackproj-a8b50.firebaseapp.com}"
+WEB_ORIGIN="${WEB_ORIGIN:-http://localhost:5173,https://hackproj-a8b50.web.app,https://hackproj-a8b50.firebaseapp.com,https://mmse.vercel.app}"
 FIREBASE_STORAGE_BUCKET="${FIREBASE_STORAGE_BUCKET:-hackproj-a8b50.firebasestorage.app}"
 FIRESTORE_DATABASE="${FIRESTORE_DATABASE:-(default)}"
 

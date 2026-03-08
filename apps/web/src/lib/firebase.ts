@@ -1,10 +1,12 @@
 import { initializeApp } from "firebase/app";
 import {
   createUserWithEmailAndPassword,
+  getRedirectResult,
   getAuth,
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  signInWithRedirect,
   signInWithPopup,
   signOut,
   type User
@@ -44,7 +46,17 @@ export function watchAuthState(callback: (user: User | null) => void) {
 export async function signInWithGoogle() {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
+
+  if (typeof window !== "undefined" && window.location.hostname.endsWith("vercel.app")) {
+    await signInWithRedirect(auth, provider);
+    return null;
+  }
+
   return signInWithPopup(auth, provider);
+}
+
+export async function resolveGoogleRedirectSignIn() {
+  return getRedirectResult(auth);
 }
 
 export async function signInWithEmail(email: string, password: string) {
